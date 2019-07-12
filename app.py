@@ -76,9 +76,22 @@ def add_user_form():
 #@login_required
 @app.route("/report", methods=['GET'])
 def report():  
-    bar_labels=labels
-    bar_values=values
-    return render_template('chart.html', title='bar chart example', max=17000, labels=bar_labels, values=bar_values)
+    import pandas as pd
+    import matplotlib.pyplot as plt
+
+    # Assign spreadsheet filename to `file`
+    file = './data/reservas-pendentes.xlsx'
+
+    # Load spreadsheet
+    df = pd.read_excel(file, index_col=0)
+
+    df['DT_Necessidade'] = pd.to_datetime(df['DT_Necessidade'])
+    graph = df['NU_QTde_atend'].groupby(
+        df['DT_Necessidade'].dt.to_period('M')).sum().reset_index()
+
+    bar_labels=graph.DT_Necessidade
+    bar_values=graph.NU_QTde_atend
+    return render_template('chart.html', title='NU_QTde_atend x DT_Necessidade', max=17000, labels=bar_labels, values=bar_values)
 
 @app.route('/line')
 def line():
