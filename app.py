@@ -20,6 +20,15 @@ import json
 
 from models import User
 
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Assign spreadsheet filename to `file`
+file = './data/reservas-pendentes.xlsx'
+
+# Load spreadsheet
+df = pd.read_excel(file, index_col=0)
+
 labels = [
     'JAN', 'FEB', 'MAR', 'APR',
     'MAY', 'JUN', 'JUL', 'AUG',
@@ -75,16 +84,7 @@ def add_user_form():
 
 #@login_required
 @app.route("/report", methods=['GET'])
-def report():  
-    import pandas as pd
-    import matplotlib.pyplot as plt
-
-    # Assign spreadsheet filename to `file`
-    file = './data/reservas-pendentes.xlsx'
-
-    # Load spreadsheet
-    df = pd.read_excel(file, index_col=0)
-
+def report():   
     df['DT_Necessidade'] = pd.to_datetime(df['DT_Necessidade'])
     graph = df['NU_QTde_atend'].groupby(
         df['DT_Necessidade'].dt.to_period('M')).sum().reset_index()
