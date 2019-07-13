@@ -7,6 +7,8 @@ from flask_login import current_user, login_user, LoginManager, login_required, 
 
 app = Flask(__name__)
 login = LoginManager(app)
+login.login_view = 'login'
+login.init_app(app)
 
 from dotenv import load_dotenv
 dotenv_path = join(dirname(__file__), '.env')
@@ -15,7 +17,7 @@ load_dotenv(dotenv_path)
 app.config.from_object(os.environ['APP_SETTINGS'])
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
- 
+
 import json 
 
 from models import User
@@ -68,6 +70,12 @@ def add_user_form():
         username = request.form.get('username')
         email = request.form.get('email')
         password = request.form.get('password')
+
+        user = User.query.filter_by(email=email).first() 
+        if user:
+            flash('Email address already exists')
+            return redirect(url_for('add_user_form'))
+
         try:
             user = User(
                 username=username,
@@ -82,8 +90,8 @@ def add_user_form():
     return render_template("create_user.html")
  
 
-#@login_required
 @app.route("/report", methods=['GET'])
+@login_required
 def report():   
     df['DT_Necessidade'] = pd.to_datetime(df['DT_Necessidade'])
     graph = df['NU_QTde_atend'].groupby(
@@ -91,7 +99,7 @@ def report():
 
     bar_labels=graph.DT_Necessidade
     bar_values=graph.NU_QTde_atend
-    return render_template('chart.html', title='NU_QTde_atend x DT_Necessidade', max=17000, labels=bar_labels, values=bar_values)
+    return render_template('report.html', title='NU_QTde_atend x DT_Necessidade', max=17000, labels=bar_labels, values=bar_values)
 
 @app.route('/line')
 def line():
@@ -108,7 +116,7 @@ def pie():
 @app.route("/login", methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('get_all_devices'))
+        return redirect(url_for('report'))
 
     if request.method == 'POST':
         email = request.form.get('email')
@@ -118,7 +126,7 @@ def login():
             user = User.query.filter_by(email=email).first() 
             if User.verify_hash(password, user.password):
                 login_user(user, remember=True)
-                return redirect(url_for('get_all_devices'))
+                return redirect(url_for('report'))
             else:
                 flash('Invalid username or password')
                 return redirect(url_for('login'))
@@ -130,7 +138,7 @@ def login():
 @app.route('/logout')
 def logout():
     logout_user()
-    return redirect(url_for('index'))
+    return redirect(url_for('login'))
 
 if __name__ == '__main__':
     app.run()

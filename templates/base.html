@@ -20,6 +20,7 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
     />
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js'></script>
     <style>
       .switch {
         opacity: 0;
@@ -179,15 +180,12 @@
         <div class="navbar-nav">
           <a
             class="nav-item nav-link active"
-            href="{{ url_for('get_all_devices') }}"
-            >Home <span class="sr-only">(Página atual)</span></a
+            href="{{ url_for('report') }}"
+            >Relatórios <span class="sr-only">(Página atual)</span></a
           >
           <a class="nav-item nav-link" href="{{ url_for('add_user_form') }}"
             >Cadastrar Usuário</a
-          >
-          <a class="nav-item nav-link" href="{{ url_for('add_device_form') }}"
-            >Cadastrar Dispositivo</a
-          >
+          > 
           <a class="nav-item nav-link" href="{{ url_for('logout') }}">Logout</a>
         </div>
       </div>
@@ -212,22 +210,5 @@
       crossorigin="anonymous "
     ></script>
     <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.4.1.min.js"></script>
-    <script>
-      $(document).ready(function() { 
-        $(".switch").click(function() {
-          var current_status = $(this).is(':checked');
-          var device_id = $(this).val();  
-          
-          $.ajax({
-            url: "/doorcontrol",
-            type: "POST",
-            data: {
-              status: current_status,
-              device_id: device_id,
-            }
-          });
-        });
-      });
-    </script>
   </body>
 </html>
